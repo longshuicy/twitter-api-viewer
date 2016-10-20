@@ -126,7 +126,7 @@ router.post('/search/tweets', function(req, res, next){
     }
 
     if(response && response.statusCode == 200) {
-      res.render('twitter-api/viewTweets', {placeholder: JSON.stringify(response)});
+      res.render('twitter-api/viewTweets', {placeholder: response});
     } 
     
     if(body) {

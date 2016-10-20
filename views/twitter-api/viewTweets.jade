@@ -1,7 +1,6 @@
 extends ../layout
 
 block content
-  div.col-xs-8.col-xs-offset-2
   if placeholder 
-    p=placeholder
+    pre=JSON.stringify(placeholder, null, 3) 
 
