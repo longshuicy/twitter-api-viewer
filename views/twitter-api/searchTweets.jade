@@ -5,6 +5,7 @@ block content
 
   div.col-xs-8.col-xs-offset-2
     form(action='/twitter/search/tweets', method='post')
+
       each  val, key in params 
         div.form-group
           label(for='key')=key  

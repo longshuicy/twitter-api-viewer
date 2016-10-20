@@ -95,7 +95,7 @@ router.get('/search/tweets', function(req, res, next){
 
 
 
-router.post('/search/tweets', function(req, res, next){
+function getAccessToken(callback){
 
   var authorization = {
     consumerKey : config.twitter.consumer_key,
@@ -116,29 +116,69 @@ router.post('/search/tweets', function(req, res, next){
     body: 'grant_type=client_credentials'
   };
 
-
-
-  console.log(config);
-
   request(options, function(error, response, body){
     if(error) {
-      console.log(error); 
+      console.log(error);
+      callback(error);
     }
 
     if(response && response.statusCode == 200) {
-      res.render('twitter-api/viewTweets', {placeholder: response});
+      callback(response);
     } 
-    
-    if(body) {
-      console.log(body); 
+  });
+
+}
+
+
+function getTweets( accessToken, query, callback){
+  var options = {
+    method: 'GET',
+    uri: 'https://api.twitter.com/1.1/search/tweets.json?',
+    headers: {
+      'Authorization': 'Bearer ' + accessToken 
     }
+  };
 
+  for( var key in query){
+    if(query.hasOwnProperty(key) && query[key]){
+      //check to see if we have to put & for additional parameters, kind've sloppy
+
+      if(options.uri.indexOf('&') > -1){
+        options.uri += "&" + key + "=" + encodeURIComponent(query[key]); 
+      } else {
+        options.uri +=  key + "=" + encodeURIComponent(query[key]); 
+      }
+    }
+  }
+
+  console.log(options);
+  request(options, function(error, response, body){
+
+    if(error) {
+      console.log(error);
+      callback(error);
+    }
+    
+    if(response ) {
+      callback(response); 
+    }
   });
-  
 
+
+}
+
+
+router.post('/search/tweets', function(req, res, next){
+
+  getAccessToken(function(response){
+    console.log(response);
+    getTweets(JSON.parse(response.body).access_token, req.body, function(tweets){
+      console.log(tweets);
+      res.render('twitter-api/viewTweets', {'placeholder': JSON.parse(tweets.body).statuses});
+    });
   });
 
-
+});
 
 
 module.exports = router;
