@@ -53,7 +53,7 @@ function getAccessToken(callback){
 }
 
 
-function getTweets( accessToken, query, callback){
+function getTweets(accessToken, query, callback){
   var options = {
     method: 'GET',
     uri: 'https://api.twitter.com/1.1/search/tweets.json?',
@@ -66,23 +66,19 @@ function getTweets( accessToken, query, callback){
     if(query.hasOwnProperty(key) && query[key]){
       //check to see if we have to put & for additional parameters, kind've sloppy
 
-      if(options.uri.indexOf('&') > -1){
-        options.uri += "&" + key + "=" + encodeURIComponent(query[key]); 
-      } else {
-        options.uri +=  key + "=" + encodeURIComponent(query[key]); 
-      }
+        options.uri +=  key + "=" + encodeURIComponent(query[key]) + '&'; 
     }
   }
+
 
   console.log(options);
   request(options, function(error, response, body){
 
     if(error) {
-      console.log(error);
       callback(error);
     }
     
-    if(response ) {
+    if(response) {
       callback(response); 
     }
   });
@@ -94,10 +90,8 @@ function getTweets( accessToken, query, callback){
 router.post('/search/tweets', function(req, res, next){
 
   getAccessToken(function(response){
-    console.log(response);
     getTweets(JSON.parse(response.body).access_token, req.body, function(tweets){
-      console.log(tweets);
-      res.render('twitter-api/viewTweets', {'placeholder': JSON.parse(tweets.body).statuses});
+      res.render('twitter-api/viewTweets', {'tweets': JSON.parse(tweets.body).statuses});
     });
   });
 

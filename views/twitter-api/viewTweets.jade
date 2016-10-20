@@ -1,6 +1,9 @@
 extends ../layout
 
 block content
-  if placeholder 
-    pre=JSON.stringify(placeholder, null, 3) 
-
+  for tweet in tweets 
+    blockquote.twitter-tweet
+      p=tweet.text
+      footer=tweet.user.name
+    pre=JSON.stringify(tweet, null, 3) 
+    hr
