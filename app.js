@@ -7,7 +7,8 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var twitterApiCalls = require('./routes/twitter-api/routes'); var app = express();
+var twitterApiCalls = require('./routes/twitter-api/routes'); 
+var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

@@ -6,17 +6,20 @@ var config = require('../../config');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Twitter API Viewer' });
+  res.render('twitter-api/index', { title: 'Twitter API Viewer' ,
+                                    endpoints: ['twitter/search/tweets', 'twitter/statuses/user_timeline']
+                                    });
 });
 
-
-
 router.get('/search/tweets', function(req, res, next){
-  var requestParams = require('./requestParams'); 
+  var requestParams = require('./searchTweetsParams'); 
   res.render('twitter-api/searchTweets', {title: 'Search Tweets', params: requestParams});
 });
 
-
+router.get('/statuses/user_timeline', function(req, res, next){
+  var requestParams = require('./userTimelineParams');
+  res.render('twitter-api/usertimeline',{title: 'User Timeline', params: requestParams});
+})
 
 function getAccessToken(callback){
 
@@ -41,7 +44,6 @@ function getAccessToken(callback){
 
   request(options, function(error, response, body){
     if(error) {
-      console.log(error);
       callback(error);
     }
 
@@ -53,10 +55,10 @@ function getAccessToken(callback){
 }
 
 
-function getTweets(accessToken, query, callback){
+function getTweets(uri, accessToken, query, callback){
   var options = {
     method: 'GET',
-    uri: 'https://api.twitter.com/1.1/search/tweets.json?',
+    uri: uri,
     headers: {
       'Authorization': 'Bearer ' + accessToken 
     }
@@ -65,13 +67,14 @@ function getTweets(accessToken, query, callback){
   for( var key in query){
     if(query.hasOwnProperty(key) && query[key]){
       //check to see if we have to put & for additional parameters, kind've sloppy
+        
+        var value = query[key] !== 'on' ? query[key] : 'true';
 
-        options.uri +=  key + "=" + encodeURIComponent(query[key]) + '&'; 
+        options.uri +=  key + "=" + encodeURIComponent(value) + '&'; 
     }
   }
 
 
-  console.log(options);
   request(options, function(error, response, body){
 
     if(error) {
@@ -88,14 +91,21 @@ function getTweets(accessToken, query, callback){
 
 
 router.post('/search/tweets', function(req, res, next){
-
   getAccessToken(function(response){
-    getTweets(JSON.parse(response.body).access_token, req.body, function(tweets){
+    getTweets('https://api.twitter.com/1.1/search/tweets.json?', JSON.parse(response.body).access_token, req.body, function(tweets){
       res.render('twitter-api/viewTweets', {'tweets': JSON.parse(tweets.body).statuses});
     });
   });
-
 });
+
+router.post('/statuses/user_timeline', function(req, res, next){
+  getAccessToken(function(response){
+    getTweets('https://api.twitter.com/1.1/statuses/user_timeline.json?', JSON.parse(response.body).access_token, req.body, function(tweets){
+      res.render('twitter-api/viewTweets', {'tweets': JSON.parse(tweets.body).statuses});       
+    });
+  });
+});
+
 
 
 module.exports = router;

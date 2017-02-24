@@ -4,7 +4,7 @@ block content
   h1.col-xs-8.col-xs-offset-2=title 
 
   div.col-xs-8.col-xs-offset-2
-    form(action='/twitter/search/tweets', method='post')
+    form(action='/twitter/statuses/user_timeline', method='post')
 
       each val, key in params 
         div.form-group
