@@ -13,12 +13,13 @@ var client = new Twitter({
 
 
 router.get('/search/tweets', function(req, res, next){
-  var requestParams = require('./requestParams'); 
+  var requestParams = require('./requestParams.selective'); 
   res.render('twitter-api/searchTweets', {title: 'Search Tweets', params: requestParams});
 });
 
 router.post('/search/tweets', function(req, res, next){
-	client.get('search/tweets',{q:'node.js'},function(error,tweets,response){
+	//console.log(req.body);
+	client.get('search/tweets',req.body,function(error,tweets,response){
 		if(error) throw JSON.stringify(error);
 		res.render('twitter-api/viewTweets',{'tweets':tweets.statuses});
 	});
