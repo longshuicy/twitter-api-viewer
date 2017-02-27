@@ -1,37 +1,47 @@
 var express = require('express');
 var router = express.Router();
-var request = require('request');
+//var request = require('request');
+
 var config = require('../../config');
-
-
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('twitter-api/index', { title: 'Twitter API Viewer' ,
-                                    endpoints: ['twitter/search/tweets', 'twitter/statuses/user_timeline']
-                                    });
+var Twitter = require('twitter');
+var client = new Twitter({
+	consumer_key:config.twitter.consumer_key,
+	consumer_secret:config.twitter.consumer_secret,
+	access_token_key:config.twitter.access_token_key,
+	access_token_secret:config.twitter.access_token_secret
 });
 
+
 router.get('/search/tweets', function(req, res, next){
-  var requestParams = require('./searchTweetsParams'); 
+  var requestParams = require('./requestParams'); 
   res.render('twitter-api/searchTweets', {title: 'Search Tweets', params: requestParams});
 });
 
-router.get('/statuses/user_timeline', function(req, res, next){
-  var requestParams = require('./userTimelineParams');
-  res.render('twitter-api/usertimeline',{title: 'User Timeline', params: requestParams});
-})
+router.post('/search/tweets', function(req, res, next){
+	client.get('search/tweets',{q:'node.js'},function(error,tweets,response){
+		if(error) throw JSON.stringify(error);
+		res.render('twitter-api/viewTweets',{'tweets':tweets.statuses});
+	});
+});
 
-function getAccessToken(callback){
+module.exports = router;
+
+//old code without using twitter library below
+
+/* GET home page. 
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Twitter API Viewer' });
+});
+*/
+
+/*function getAccessToken(callback){
 
   var authorization = {
     consumerKey : config.twitter.consumer_key,
     consumerSecret : config.twitter.consumer_secret,
     bearerTokenCredentials : config.twitter.consumer_key + ':' + config.twitter.consumer_secret,
   }
-
   var encoding = new Buffer(authorization.bearerTokenCredentials).toString('base64');
-
-
   var options = {
     method: 'POST',
     uri:'https://api.twitter.com/oauth2/token',
@@ -44,6 +54,7 @@ function getAccessToken(callback){
 
   request(options, function(error, response, body){
     if(error) {
+      console.log(error);
       callback(error);
     }
 
@@ -52,13 +63,13 @@ function getAccessToken(callback){
     } 
   });
 
-}
+}*/
 
 
-function getTweets(uri, accessToken, query, callback){
+/*function getTweets(accessToken, query, callback){
   var options = {
     method: 'GET',
-    uri: uri,
+    uri: 'https://api.twitter.com/1.1/search/tweets.json?',
     headers: {
       'Authorization': 'Bearer ' + accessToken 
     }
@@ -67,14 +78,13 @@ function getTweets(uri, accessToken, query, callback){
   for( var key in query){
     if(query.hasOwnProperty(key) && query[key]){
       //check to see if we have to put & for additional parameters, kind've sloppy
-        
-        var value = query[key] !== 'on' ? query[key] : 'true';
 
-        options.uri +=  key + "=" + encodeURIComponent(value) + '&'; 
+        options.uri +=  key + "=" + encodeURIComponent(query[key]) + '&'; 
     }
   }
 
 
+  console.log(options);
   request(options, function(error, response, body){
 
     if(error) {
@@ -87,25 +97,7 @@ function getTweets(uri, accessToken, query, callback){
   });
 
 
-}
-
-
-router.post('/search/tweets', function(req, res, next){
-  getAccessToken(function(response){
-    getTweets('https://api.twitter.com/1.1/search/tweets.json?', JSON.parse(response.body).access_token, req.body, function(tweets){
-      res.render('twitter-api/viewTweets', {'tweets': JSON.parse(tweets.body).statuses});
-    });
-  });
-});
-
-router.post('/statuses/user_timeline', function(req, res, next){
-  getAccessToken(function(response){
-    getTweets('https://api.twitter.com/1.1/statuses/user_timeline.json?', JSON.parse(response.body).access_token, req.body, function(tweets){
-      res.render('twitter-api/viewTweets', {'tweets': JSON.parse(tweets.body).statuses});       
-    });
-  });
-});
+}*/
 
 
 
-module.exports = router;
