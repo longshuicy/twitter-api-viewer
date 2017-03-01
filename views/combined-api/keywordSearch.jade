@@ -1,0 +1,27 @@
+extends ../layout
+
+block content
+	h1.col-xs-8.col-xs-offset-2=title 
+	
+	div.col-xs-8.col-xs-offset-2
+		form(action='/keyword-search/search', method='post')
+			TABLE(border='1',width="100%")
+				tbody
+						tr
+							td(colspan="2")
+								label TYPE YOUR QUERY HERE
+								input(type=params.q.type,name='q',required = params.q.required,placeholder=params.q.example).form-control
+								blockquote #{params.q.about}
+						tr
+							td(width="50%")
+								each  val, key in params.twitter
+									label(for='key')=key
+									input(type=val.type, name=key, required=val.required, placeholder=val.example).form-control
+									blockquote #{val.about}
+							td(width="50%")
+								each  val, key in params.facebook
+									label(for='key')=key  
+									input(type=val.type, name=key, required=val.required, placeholder=val.example).form-control
+									blockquote #{val.about}
+			
+			button(type='submit', class='btn btn-info') Submit

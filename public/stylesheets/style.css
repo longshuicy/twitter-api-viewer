@@ -17,6 +17,19 @@ pre {
     word-wrap: normal !important;
     white-space: pre !important;
 }
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+	font-size: 20px;
+    font-weight: bold;
+
+}
+tbody{
+	display: table-header-group;
+    vertical-align: top;
+    border-color: inherit;
+}
 
 blockquote.twitter-tweet {
   display: inline-block;

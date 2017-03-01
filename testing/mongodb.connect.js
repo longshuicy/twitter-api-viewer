@@ -1,16 +1,38 @@
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
- 
-// Connection URL 
-var url = 'mongodb://localhost:27017/myproject';
+var MongoClient = require('mongodb').MongoClient, assert = require('assert');
+var url = 'mongodb://localhost:27017/social_monitor';
 // Use connect method to connect to the Server 
+
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
-  findDocuments(db,function(){ db.close(); });
-  //insertDocuments(db,function(){ db.close(); });
+  //removeCollection(db,'facebook',function(){
+	findDocuments(db,'facebook',function(){ db.close(); });
+  //});
 
 });
+
+//find all
+var findDocuments = function(db,collection_name, callback){
+	var collection = db.collection(collection_name);
+	//collection.find({}).toArray(function(err,docs){
+	collection.find({}).toArray(function(err,docs){
+		assert.equal(err,null);
+		console.log("found the following records in collection: " + collection_name);
+		console.log(docs);
+		callback(docs);
+	});
+}
+
+//remove all
+var removeCollection = function(db,collection_name,callback){
+	var collection = db.collection(collection_name);
+	collection.remove({},function(err,result){
+		assert.equal(err,null);
+		console.log("remove the whole collection");
+		callback(result);
+	});
+}
+
 
 //create collections
 var createCapped = function(db,callback){
@@ -23,7 +45,7 @@ var createCapped = function(db,callback){
 }
 //insert
 var insertDocuments = function(db,callback){
-	var collection = db.collection('Twitter');
+	var collection = db.collection('twitter');
 	collection.insertMany([
 	{name:'abc',id:'12345',job:['abc','def']},{a:2},{a:3}],
 	function(err,result){
@@ -57,17 +79,8 @@ var deleteDocuments = function(db,callback){
 	});
 }
 
-//find all
-var findDocuments = function(db,callback){
-	var collection = db.collection('Twitter');
-	//collection.find({}).toArray(function(err,docs){
-	collection.find({}).toArray(function(err,docs){
-		assert.equal(err,null);
-		console.log("found the following records");
-		console.log(docs);
-		callback(docs);
-	});
-}
+
+
 
 //index a collection
 var indexCollection = function(db,callback){
