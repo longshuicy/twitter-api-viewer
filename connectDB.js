@@ -1,15 +1,18 @@
 // connect to database and insert documents
 var storeJson = function(collection_name,arrayOfJson){
-
 	var MongoClient = require('mongodb').MongoClient, assert = require('assert');
 	var url = 'mongodb://localhost:27017/social_monitor';
 	MongoClient.connect(url, function(err, db) {
 	  assert.equal(null, err);
 	  console.log("Connected correctly to server");
-	  insertDocuments(db,collection_name, function(){ db.close(); });
+	  //removeCollection(db,collection_name,function(){
+		insertDocuments(db,collection_name, function(){
+			db.close(); 
+			});
+	 // });
 	});
 
-	//insert
+	// insert
 	var insertDocuments = function(db,collection_name,callback){
 		var collection = db.collection(collection_name);
 		collection.insertMany(arrayOfJson, function(err,result){
@@ -18,33 +21,36 @@ var storeJson = function(collection_name,arrayOfJson){
 						callback(result);
 					 });
 	}
+	// remove collection
+	var removeCollection = function(db,collection_name,callback){
+		var collection = db.collection(collection_name);
+		collection.remove({},function(err,result){
+			assert.equal(err,null);
+			console.log("remove the whole collection: "+collection_name);
+			callback();
+		});
+	};
 }
 
-/*function readJson(){
+//remove all
+var removeJson = function(collection_name){
 	var MongoClient = require('mongodb').MongoClient, assert = require('assert');
 	var url = 'mongodb://localhost:27017/social_monitor';
-	var val = MongoClient.connect(url, function(err, db) {
+	MongoClient.connect(url, function(err, db) {
 	  assert.equal(null, err);
 	  console.log("Connected correctly to server");
-	  var val = findDocuments(db,function(){ db.close(); });
-	  return val;//this call back means execute close database inside of the findDocuments?
+	  removeCollection(db,collection_name, function(){ db.close(); });
 	});
-	
-	//var temp;
-	
-	function findDocuments(db,callback){
-		var collection = db.collection('facebook');
-		var val = collection.find({}).each(function(err,docs){
-			return docs;
-			callback();
-			});
-		return val;
-	}
-	
-	console.log(val);
-	return val;
-	
-	
-}*/
 
-module.exports = {storeJson};
+	var removeCollection = function(db,collection_name,callback){
+		var collection = db.collection(collection_name);
+		collection.remove({},function(err,result){
+			assert.equal(err,null);
+			console.log("remove the whole collection");
+			callback();
+		});
+	};
+}
+
+
+module.exports = {storeJson,removeJson};

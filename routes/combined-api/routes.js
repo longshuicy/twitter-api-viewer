@@ -22,16 +22,17 @@ router.post('/search', function(req, res, next){
 		//console.log('facebook');
 		fbClient(req);	
 	}
-	
-	//res.render('twitter-api/viewTweets',{'tweets':tweets.statuses});
-	//render it. Ugly! need to look back later
+});
+
+// go to a different endpoint to present data
+router.get('/result',function(req,res,next){
 	var MongoClient = require('mongodb').MongoClient, assert = require('assert');
 	var url = 'mongodb://localhost:27017/social_monitor';
 	MongoClient.connect(url, function (err, db) {
 		if (err) {
 					console.log('Unable to connect to the mongoDB server. Error:', err);
 		} else {
-					console.log('connected');
+					console.log('connected to fetch data');
 					db.collection('twitter', function(err, collection1) {
 						collection1.find().toArray(function(err, twts) {
 							db.collection('facebook', function(err, collection) {
@@ -44,10 +45,8 @@ router.post('/search', function(req, res, next){
 						});
 				}
 	});
-	
 });
-
-
+	
 
 //twitter
 var twtClient = function(req){
@@ -69,7 +68,7 @@ var twtClient = function(req){
 		//console.log(query);
 		client.get('search/tweets',query,function(error,tweets,response){
 			if(error) throw JSON.stringify(error);
-			//console.log(tweets.statuses);
+			DB.removeJson('twitter');
 			DB.storeJson('twitter',tweets.statuses);
 			// connect to a mongo db a dump the return json into it;
 		});
@@ -78,6 +77,7 @@ var twtClient = function(req){
 //facebook
 var fbClient = function(req){
 	var base = 'search?q='+req.body['q']+'&type=';
+	DB.removeJson('facebook');
 	for (var key in req.body) {
 		if (['user','page','group','event','place','placetopic'].includes(key)){
 			var query=base + key
@@ -92,7 +92,7 @@ var fbClient = function(req){
 					console.log(!res ? 'error occurred' : res.error);
 					return;
 				}else{
-					//console.log(res.data);
+					//erase last time's result in database before firing up a new error
 					DB.storeJson('facebook',res.data);
 					//connect to a mongo db and dump the return json into it
 				}

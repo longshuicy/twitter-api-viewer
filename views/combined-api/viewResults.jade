@@ -1,16 +1,18 @@
 extends ../layout
 
 block content
+	h1 TWITTER DATA
 	for data in twitter
 		blockquote.combined-keyword-search
-			p=data
-			//footer=data.id
+			p=data.text
+			footer=data.id
 		pre=JSON.stringify(data, null, 3) 
 		hr
+	h1 FACEBOOK DATA
 	for data in facebook
 		blockquote.combined-keyword-search
-			p=data
-			//footer=data.id
+			p=data.name
+			footer=data.id
 		pre=JSON.stringify(data, null, 3) 
 		hr
   
