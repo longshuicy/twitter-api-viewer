@@ -2,7 +2,7 @@
 var express = require('express');
 var router = express.Router();
 var config = require('../../config');
-var storeJson = require('../../connectDB');
+var DB = require('../../connectDB');
 
 router.get('/search', function(req, res, next){
   var requestParams = require('./SearchParams'); 
@@ -23,7 +23,31 @@ router.post('/search', function(req, res, next){
 		fbClient(req);	
 	}
 	
+	//res.render('twitter-api/viewTweets',{'tweets':tweets.statuses});
+	//render it. Ugly! need to look back later
+	var MongoClient = require('mongodb').MongoClient, assert = require('assert');
+	var url = 'mongodb://localhost:27017/social_monitor';
+	MongoClient.connect(url, function (err, db) {
+		if (err) {
+					console.log('Unable to connect to the mongoDB server. Error:', err);
+		} else {
+					console.log('connected');
+					db.collection('twitter', function(err, collection1) {
+						collection1.find().toArray(function(err, twts) {
+							db.collection('facebook', function(err, collection) {
+								collection.find().toArray(function(err, fbs) {
+									res.render('combined-api/viewResults', {'twitter':twts,'facebook':fbs});
+									db.close();
+									});
+								});
+							});
+						});
+				}
+	});
+	
 });
+
+
 
 //twitter
 var twtClient = function(req){
@@ -46,9 +70,8 @@ var twtClient = function(req){
 		client.get('search/tweets',query,function(error,tweets,response){
 			if(error) throw JSON.stringify(error);
 			//console.log(tweets.statuses);
-			storeJson('twitter',tweets.statuses);
+			DB.storeJson('twitter',tweets.statuses);
 			// connect to a mongo db a dump the return json into it;
-			//res.render('twitter-api/viewTweets',{'tweets':tweets.statuses});
 		});
 }
 
@@ -70,7 +93,7 @@ var fbClient = function(req){
 					return;
 				}else{
 					//console.log(res.data);
-					storeJson('facebook',res.data);
+					DB.storeJson('facebook',res.data);
 					//connect to a mongo db and dump the return json into it
 				}
 			});
